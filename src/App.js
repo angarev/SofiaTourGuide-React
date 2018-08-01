@@ -12,7 +12,9 @@ import logo from './assets/logo.png';
 import foursquare from './assets/foursquare.png';
 
 
+
 class App extends Component {
+
 
   constructor (props) {
     super(props);
@@ -23,12 +25,22 @@ class App extends Component {
       isMenuOn: false,
       items: [],
       filteredLocations: [],
-      googleError: true
+      apiResponse: false,
+      googleError: false
     }
   }
 
+  //Handle the google map error
+   gm_authFailure = () => {
+        this.setState({googleError: true});
+   }
+
+
   //Get API data from Foursquare
   componentDidMount () {
+
+      window.gm_authFailure = this.gm_authFailure;
+
     const data = [];
     getAll().then( places => {
       places.forEach(function(item) {
@@ -41,18 +53,13 @@ class App extends Component {
           id: item.id
         });
       });
-      //Check if data from foursquare and set state
-      if (data && data.length){
-         this.setState({
-            locations: data,
-            filteredLocations: data,
-            apiResponse: true
-          });
-      } else {
-            this.setState({apiResponse: false})
-      }
-     });
-  }
+       this.setState({
+          locations: data,
+          filteredLocations: data,
+          apiResponse: true
+        });
+     }).catch(error => this.setState({apiResponse: false}));
+  };
 
   //Filter query
   updateQuery = event => {
@@ -88,13 +95,11 @@ class App extends Component {
         styles: googleStyle
       });
 
+
       // set up bounds and infoWindow
       const bounds = new window.google.maps.LatLngBounds();
       const infowindow = new window.google.maps.InfoWindow({maxWidth: 350});
 
-      this.setState({
-          googleError: false
-      });
 
       //Add google marker and event click listener for each location
       this.state.locations.forEach( (location) =>  {
@@ -164,18 +169,19 @@ class App extends Component {
         });
       });
       map.fitBounds(bounds);
+    } else {
+        this.setState({googleError: true});
     }
   }
 
   render() {
 
-
     const {filterString, filteredLocations, apiResponse, googleError} = this.state;
-         
+
         return (
-            <Row className="show-grid" bsClass="main" role="main">
+            <Row className="show-grid" bsClass="main" role="main" tabIndex="1">
               <div className={this.state.isMenuOn ? "row row-offcanvas row-offcanvas-left active" : " row row-offcanvas row-offcanvas-left"}>
-                <aside className="col-sm-2 col-xs-12 sidebar-offcanvas" id="sidebar">
+                <aside className="col-sm-2 col-xs-12 sidebar-offcanvas" id="sidebar" tabIndex="2">
                   <div className="logo text-center">
                     <img src={logo} alt="Sofia Tour Guide" />
                     <p>Powered by </p>
@@ -187,19 +193,25 @@ class App extends Component {
                              placeholder="Search for..."
                              value={ this.query }
                              onKeyUp={ this.updateQuery }
+                             tabIndex={ apiResponse ? '0' : '-1' }
                       />
                     </div>
             
-                    {!apiResponse ? 
+                    {!apiResponse ?
                         <div className="alert" role="alert">
                           <p>Sorry. There is a some problem with data from Foursquare.</p>
                         </div> :
                         ""
-                    }                    
-                                        
+                    }
+
                     {filteredLocations.length > 0 ?
-                        <ListView locations = {filteredLocations} filterString = {filterString} />
-                         :                            
+                        <ListView
+                            locations = {filteredLocations}
+                            filterString = {filterString}
+                            apiResponse = {apiResponse}
+
+                        />
+                         :
                         <div className="alert" role="alert">
                           <p>No results.</p>
                         </div>
@@ -207,7 +219,7 @@ class App extends Component {
                     
                   </div>
                 </aside>
-                  <main className="col-sm-10 col-xs-12 main-content-area" role="main">
+                  <main className="col-sm-10 col-xs-12 main-content-area" role="main" tabIndex={ !googleError ? '0' : '-1' }>
                     <p className="pull-left visible-xs js-toogle-button">
                       <button type="button" onClick={()=> this.setState({isMenuOn: !this.state.isMenuOn})}>
                         <div></div>
@@ -215,7 +227,20 @@ class App extends Component {
                         <div></div>
                       </button>
                     </p>
-                    <Map errorGoogle = {googleError} />
+                      {googleError ?
+                          <div className="container">
+                            <div className="col-xs-12 col-md-3 col-md-offset-5 text-center">
+                              <div className="loading">
+                                  <div className="loading">
+                                      <h3>There is a problem with the Google Map API connection. Please check your Internet connection.</h3>
+                                  </div>
+                              </div>
+                            </div>
+                          </div>
+                          :
+                          <Map />
+                      }
+
                   </main>
               </div>
             </Row>
@@ -223,5 +248,5 @@ class App extends Component {
     }
 }
 export default scriptLoader(
-    [`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}`]
+    [`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`]
 )(App);

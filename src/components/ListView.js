@@ -9,7 +9,7 @@ class ListView extends Component{
   }
 
   render() {
-    const { locations, filterString } = this.props;
+    const { locations, filterString, apiResponse } = this.props;
     return (
         <div  role="complementary"  tabIndex= "-1">
           <ul className="list-group"  role="navigation">
@@ -18,7 +18,11 @@ class ListView extends Component{
                     filterString.toLocaleLowerCase()
                 )
             ).map((location, id) =>
-                <li key={id} className="list-group-item" onClick={this.showInfoWindow.bind(this, location)}>
+                <li key={id}
+                    className="list-group-item"
+                    onClick={this.showInfoWindow.bind(this, location)}
+                    tabIndex={ apiResponse ? '0' : '-1' }
+                >
                   {location.title}
                 </li>
             )}
