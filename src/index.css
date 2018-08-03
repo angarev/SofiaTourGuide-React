@@ -91,13 +91,14 @@ Styling MAP
 
 #iw-container .iw-title {
     font-family: 'Open Sans Condensed', sans-serif;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 400;
-    padding: 10px;
+    padding:5px;
     background-color: #48b5e9;
     color: white;
     margin: 0;
     border-radius: 2px 2px 0 0;
+    text-transform: uppercase;
 }
 
 #iw-container .iw-content {
@@ -105,7 +106,7 @@ Styling MAP
     line-height: 18px;
     font-weight: 400;
     margin-right: 1px;
-    padding: 15px 5px 20px 15px;
+    padding: 15px 5px 20px 0;
     max-height: 140px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -127,16 +128,22 @@ Styling MAP
 
 .post-thumb img {
     display: block;
+    background: #ff9800;
 }
 
 .post-content {
-    margin-left: 115px;
+    margin-left: 100px;
+    min-height: 84px;
+}
+
+.post-content h3 {
+    font-size: 13px;
 }
 
 .post-title {
     font-weight: bold;
     font-size: 200%;
-    margin-top: 10px;
+    margin-top: 0;
 }
 
 /*
